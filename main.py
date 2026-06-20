@@ -9,8 +9,8 @@ Run with:
 What it does each scan cycle:
   1. Fetch fresh price data for the watchlist
   2. Run all skill sensors on each symbol
-  3. If signals exist, ask Ollama to make a decision
-  4. Pass Ollama's decision through the Risk Manager
+    3. If signals exist, ask LM Studio to make a decision
+    4. Pass LM Studio's decision through the Risk Manager
   5. If approved, execute on the paper portfolio
   6. Log everything to the journal
 """
@@ -23,7 +23,7 @@ from data.fetcher import rate_limited_fetch
 from skills.momentum import MomentumSkill
 from risk.manager import RiskManager
 from broker import create_portfolio
-from engine import ollama_engine
+from engine import lmstudio_engine as decision_engine
 
 # ── Initialise components ──────────────────────────────────
 portfolio = create_portfolio()
@@ -76,8 +76,8 @@ def run_scan():
         print("  No signals found this cycle.")
         return
 
-    # ── Step 3: Ollama decision engine ───────────────────────
-    print(f"\n[3/4] Asking Ollama about {len(all_signals)} symbol(s)...")
+    # ── Step 3: LM Studio decision engine ─────────────────────
+    print(f"\n[3/4] Asking LM Studio about {len(all_signals)} symbol(s)...")
     portfolio_ctx = portfolio.summary()
 
     for symbol, signals in all_signals.items():
@@ -89,7 +89,7 @@ def run_scan():
             print(f"  Skipping {symbol} — already in portfolio")
             continue
 
-        decision = ollama_engine.analyse(
+        decision = decision_engine.analyse(
             symbol          = symbol,
             signals         = [s.to_dict() for s in signals],
             portfolio_context = portfolio_ctx,
@@ -97,10 +97,10 @@ def run_scan():
         )
 
         if decision is None:
-            print(f"  [{symbol}] No decision returned from Ollama")
+            print(f"  [{symbol}] No decision returned from LM Studio")
             continue
 
-        print(f"  [{symbol}] Ollama says: {decision.action.upper()} "
+        print(f"  [{symbol}] LM Studio says: {decision.action.upper()} "
               f"(confidence={decision.confidence:.2f})")
         print(f"    Reasoning: {decision.reasoning}")
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         print("\n  Fix the above config errors in your .env file first.")
         exit(1)
 
-    print(f"  Model     : {settings.OLLAMA_MODEL}")
+    print(f"  Model     : {settings.LM_STUDIO_MODEL}")
     print(f"  Watchlist : {', '.join(settings.WATCHLIST)}")
     print(f"  Risk/trade: {settings.RISK_PER_TRADE_PCT}%")
     print(f"  Broker    : {settings.BROKER_MODE}")

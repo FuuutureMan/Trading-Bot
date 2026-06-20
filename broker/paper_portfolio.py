@@ -28,7 +28,7 @@ class Position:
     target_price: float
     direction:    str           # "long" or "short"
     opened_at:    datetime = field(default_factory=datetime.utcnow)
-    entry_reason: str = ""      # Ollama's reasoning, stored for the journal
+    entry_reason: str = ""      # LM Studio's reasoning, stored for the journal
 
     def current_value(self, current_price: float) -> float:
         return self.shares * current_price

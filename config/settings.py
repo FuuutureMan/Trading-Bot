@@ -12,17 +12,14 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 
-# ── Alpha Vantage ──────────────────────────────────────────
-ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY", "")
-
 # ── Webull ─────────────────────────────────────────────────
 WEBULL_EMAIL        = os.getenv("WEBULL_EMAIL", "")
 WEBULL_PASSWORD     = os.getenv("WEBULL_PASSWORD", "")
 WEBULL_TRADING_PIN  = os.getenv("WEBULL_TRADING_PIN", "")
 
-# ── Ollama ─────────────────────────────────────────────────
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
-OLLAMA_HOST  = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+# ── LM Studio ──────────────────────────────────────────────
+LM_STUDIO_MODEL = os.getenv("LM_STUDIO_MODEL", os.getenv("OLLAMA_MODEL", "mistral"))
+LM_STUDIO_HOST  = os.getenv("LM_STUDIO_HOST", os.getenv("OLLAMA_HOST", "http://localhost:11434"))
 
 # ── Portfolio ──────────────────────────────────────────────
 PAPER_BALANCE       = float(os.getenv("PAPER_BALANCE", 25000))
@@ -67,16 +64,14 @@ SCAN_TIMES = ["09:45", "12:00", "15:30"]   # HH:MM ET
 def validate():
     """Call at startup to catch missing config early."""
     errors = []
-    if not ALPHA_VANTAGE_API_KEY:
-        errors.append("ALPHA_VANTAGE_API_KEY is missing from .env")
 
-    if BROKER_MODE == "webull":
-        if not WEBULL_EMAIL:
-            errors.append("WEBULL_EMAIL is missing from .env")
-        if not WEBULL_PASSWORD:
-            errors.append("WEBULL_PASSWORD is missing from .env")
-        if not WEBULL_TRADING_PIN:
-            errors.append("WEBULL_TRADING_PIN is missing from .env")
+    if not WEBULL_EMAIL:
+        errors.append("WEBULL_EMAIL is missing from .env")
+    if not WEBULL_PASSWORD:
+        errors.append("WEBULL_PASSWORD is missing from .env")
+
+    if BROKER_MODE == "webull" and not WEBULL_TRADING_PIN:
+        errors.append("WEBULL_TRADING_PIN is missing from .env")
     if BROKER_MODE not in {"paper", "webull"}:
         errors.append("BROKER_MODE must be 'paper' or 'webull'")
 

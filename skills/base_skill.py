@@ -27,7 +27,7 @@ class Signal:
     timeframe:  str             # "daily", "weekly", "4h"
     timestamp:  datetime = field(default_factory=datetime.utcnow)
 
-    # Optional context — helps Ollama reason about the signal
+    # Optional context — helps LM Studio reason about the signal
     notes:      str  = ""       # Human-readable explanation
     price:      Optional[float] = None   # Price when signal fired
     stop_hint:  Optional[float] = None   # Suggested stop level

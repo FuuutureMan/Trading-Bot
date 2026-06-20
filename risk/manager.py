@@ -1,13 +1,13 @@
 """
 risk/manager.py
 ────────────────
-The hard rules layer. Sits between Ollama's recommendation
-and the broker. Ollama cannot override these checks.
+The hard rules layer. Sits between LM Studio's recommendation
+and the broker. LM Studio cannot override these checks.
 
 Usage:
     from risk.manager import RiskManager
     rm = RiskManager(portfolio)
-    result = rm.validate(signal, ollama_recommendation)
+    result = rm.validate(signal, lmstudio_recommendation)
     if result.approved:
         broker.place_order(...)
 """

@@ -1,60 +1,60 @@
 """
 data/fetcher.py
 ───────────────
-Pulls OHLCV price data from Alpha Vantage and returns
+Pulls OHLCV price data from Webull and returns
 clean pandas DataFrames ready for the skill sensors.
-
-Alpha Vantage free tier = 25 requests/day.
-We cache results to a local SQLite DB to avoid burning the quota.
 """
 
-import time
 import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
 import pandas_ta as ta
+from webull import webull
 
 from config import settings
 
 
-# ── Initialise Alpha Vantage clients ──────────────────────
-_ts = TimeSeries(key=settings.ALPHA_VANTAGE_API_KEY, output_format="pandas")
-_ti = TechIndicators(key=settings.ALPHA_VANTAGE_API_KEY, output_format="pandas")
+# ── Initialise Webull client ─────────────────────────────
+_wb = webull()
+
+
+def _ensure_logged_in():
+    if _wb.is_logged_in():
+        return
+    if not settings.WEBULL_EMAIL or not settings.WEBULL_PASSWORD:
+        raise RuntimeError("Webull credentials are required to fetch market data.")
+    print("  [webull] Logging in for market data...")
+    _wb.login(
+        username=settings.WEBULL_EMAIL,
+        password=settings.WEBULL_PASSWORD,
+        device_name=settings.WEBULL_DEVICE_NAME,
+        save_token=False,
+    )
+
+
+def _clean_bars(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.index = pd.to_datetime(df.index)
+    df = df.sort_index(ascending=False)
+    return df.astype(float)
 
 
 def get_daily_ohlcv(symbol: str, outputsize: str = "compact") -> pd.DataFrame:
     """
-    Fetch daily OHLCV bars for a symbol.
-
-    outputsize:
-        "compact"  → last 100 bars  (use this normally, saves API calls)
-        "full"     → up to 20 years (use for initial analysis only)
-
-    Returns a DataFrame with columns:
-        open, high, low, close, volume
+    Fetch daily OHLCV bars for a symbol from Webull.
+    Returns a DataFrame with columns: open, high, low, close, volume.
     Indexed by date, newest first.
     """
+    _ensure_logged_in()
     print(f"  Fetching daily data for {symbol}...")
-    data, _ = _ts.get_daily(symbol=symbol, outputsize=outputsize)
-
-    # Alpha Vantage returns ugly column names like "1. open" — clean them up
-    data.columns = ["open", "high", "low", "close", "volume"]
-    data.index = pd.to_datetime(data.index)
-    data = data.sort_index(ascending=False)   # Newest row first
-    data = data.astype(float)
-
-    return data
+    df = _wb.get_bars(stock=symbol, interval="d1", count=100, extendTrading=0)
+    return _clean_bars(df[["open", "high", "low", "close", "volume"]])
 
 
 def get_weekly_ohlcv(symbol: str) -> pd.DataFrame:
-    """Fetch weekly bars — used by the multi-timeframe skill."""
+    """Fetch weekly bars from Webull."""
+    _ensure_logged_in()
     print(f"  Fetching weekly data for {symbol}...")
-    data, _ = _ts.get_weekly(symbol=symbol)
-    data.columns = ["open", "high", "low", "close", "volume"]
-    data.index = pd.to_datetime(data.index)
-    data = data.sort_index(ascending=False)
-    data = data.astype(float)
-    return data
+    df = _wb.get_bars(stock=symbol, interval="w1", count=100, extendTrading=0)
+    return _clean_bars(df[["open", "high", "low", "close", "volume"]])
 
 
 def enrich_with_indicators(df: pd.DataFrame) -> pd.DataFrame:
@@ -90,21 +90,17 @@ def get_enriched(symbol: str) -> pd.DataFrame:
     return df
 
 
-def rate_limited_fetch(symbols: list, delay: float = 12.0) -> dict:
+def rate_limited_fetch(symbols: list, delay: float = 0.0) -> dict:
     """
-    Fetch enriched data for a list of symbols with a delay between
-    each call to respect Alpha Vantage rate limits.
+    Fetch enriched data for a list of symbols.
 
-    Free tier: 5 calls/minute → 12 second delay is safe.
+    Webull has relaxed rate limits compared to other data providers.
     Returns a dict of { symbol: DataFrame }
     """
     results = {}
-    for i, symbol in enumerate(symbols):
+    for symbol in symbols:
         try:
             results[symbol] = get_enriched(symbol)
-            if i < len(symbols) - 1:
-                print(f"  Waiting {delay}s (API rate limit)...")
-                time.sleep(delay)
         except Exception as e:
             print(f"  Error fetching {symbol}: {e}")
             results[symbol] = None

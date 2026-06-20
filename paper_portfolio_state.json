@@ -1,5 +1,15 @@
 {
-  "cash": 25000.0,
+  "cash": 22526.58,
   "peak_value": 25000.0,
-  "positions": {}
+  "positions": {
+    "XLE": {
+      "shares": 46,
+      "entry_price": 53.77,
+      "stop_price": 52.5,
+      "target_price": 56.31,
+      "direction": "long",
+      "opened_at": "2026-06-20T04:20:51.390058",
+      "entry_reason": "Single bullish momentum signal from RSI oversold condition, recommending a buy with moderate confidence."
+    }
+  }
 }

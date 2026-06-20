@@ -1,5 +1,4 @@
 # Data
-alpha_vantage
 pandas
 pandas-ta
 numpy
@@ -8,7 +7,7 @@ numpy
 webull
 
 # AI
-ollama
+# LM Studio local model client via HTTP
 
 # Database
 sqlalchemy

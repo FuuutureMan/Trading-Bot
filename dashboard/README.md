@@ -9,7 +9,7 @@ Live monitoring dashboard for your paper trading portfolio.
 - **Position Details**: Deep dive into each position with price relationships
 - **Performance Metrics**: Starting balance, cumulative P&L, peak-to-current analysis
 - **Auto-Refresh**: Configurable refresh interval (10-300 seconds)
-- **Current Prices**: Fetches live data from Alpha Vantage
+- **Current Prices**: Fetches live data from Webull
 
 ## Installation
 
@@ -42,7 +42,7 @@ The dashboard will open in your browser at `http://localhost:8501`
 - Symbol, shares, entry/current/stop/target prices
 - Unrealised P&L in dollars and percentage
 - When the position was opened
-- The Ollama reasoning that triggered the entry
+- The LM Studio reasoning that triggered the entry
 
 ### Position Details Expander
 For each position:
@@ -57,7 +57,7 @@ For each position:
 ## How It Works
 
 1. Reads `paper_portfolio_state.json` (created by `main.py`)
-2. Fetches current prices from Alpha Vantage for all open positions
+2. Fetches current prices from Webull for all open positions
 3. Calculates unrealised P&L
 4. Displays everything with auto-refresh
 
@@ -80,6 +80,6 @@ You can:
 ## Notes
 
 - Dashboard reads-only (no trading decisions made here)
-- Prices update every hour (Alpha Vantage API caching)
+- Prices update in real-time from Webull
 - Portfolio state syncs whenever `main.py` executes a trade
-- Requires `.env` file with `ALPHA_VANTAGE_API_KEY` for live prices
+- Requires `.env` file with `WEBULL_EMAIL` and `WEBULL_PASSWORD` for live prices

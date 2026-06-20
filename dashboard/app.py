@@ -90,7 +90,7 @@ with st.sidebar:
     st.metric("Watchlist", ", ".join(settings.WATCHLIST))
     st.metric("Risk per trade", f"{settings.RISK_PER_TRADE_PCT}%")
     st.metric("Max open trades", settings.MAX_OPEN_TRADES)
-    st.metric("Ollama model", settings.OLLAMA_MODEL)
+    st.metric("LM Studio model", settings.LM_STUDIO_MODEL)
     st.metric("Broker mode", settings.BROKER_MODE.upper())
     
     st.markdown("---")
@@ -266,11 +266,10 @@ with col3:
 # Footer
 st.divider()
 st.caption(
-    "📊 Trading Bot Dashboard | Paper Trading Mode | "
-    f"Refresh rate: {refresh_interval}s | "
-    f"Data source: Alpha Vantage + Ollama"
+        "📊 Trading Bot Dashboard | Trading Bot Mode | "
+        f"Refresh rate: {refresh_interval}s | "
+        f"Data source: Webull + LM Studio"
 )
-
 # Auto-refresh using streamlit's rerun mechanism
 import time
 time.sleep(refresh_interval)
