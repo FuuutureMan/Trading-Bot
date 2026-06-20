@@ -1,0 +1,25 @@
+# Data
+alpha_vantage
+pandas
+pandas-ta
+numpy
+
+# Broker
+webull
+
+# AI
+ollama
+
+# Database
+sqlalchemy
+
+# Scheduling
+APScheduler
+
+# Dashboard
+streamlit
+plotly
+
+# Utilities
+python-dotenv
+requests
